@@ -1,0 +1,23 @@
+{
+  "name": "ip-camera-node-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal Node.js website demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test:stream": "node scripts/test_stream_http.js",
+    "face:service": "python -m uvicorn face_service:app --app-dir scripts --host 127.0.0.1 --port 8001",
+    "face:service:window:ps": "powershell -ExecutionPolicy Bypass -File scripts/start_face_service.ps1",
+    "face:service:window:sh": "bash scripts/start_face_service.sh",
+    "face:service:window:cmd": "scripts\\start_face_service.cmd"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "ffmpeg-static": "^5.3.0",
+    "multicast-dns": "^7.2.5"
+  }
+}

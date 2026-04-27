@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Face Recognition Test - IP Camera Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div>
+            <span class="pill">Face Test</span>
+            <h1 style="margin-top:8px;">Face Recognition Test Page</h1>
+            <p class="muted">Use current live stream frame to run face recognition instantly.</p>
+          </div>
+          <a href="/dashboard" class="btn-ghost" style="text-decoration:none;">Back to Dashboard</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Live Stream</h3>
+        <div class="stream-viewport">
+          <img id="live-stream" class="stream-mjpeg" alt="USB camera stream" width="640" height="480" />
+        </div>
+        <p id="stream-status" class="muted" style="margin-top:10px;font-size:13px;"></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+          <button id="recognize-btn" class="btn-primary" type="button">Start Face Recognition</button>
+          <span id="recognize-status" class="muted" style="font-size:13px;"></span>
+        </div>
+        <p id="recognize-result" class="muted" style="margin-top:8px;font-size:13px;"></p>
+      </section>
+
+      <section class="card">
+        <h3>Latest Test Capture</h3>
+        <div class="stream-viewport" style="max-width:640px;">
+          <img id="capture-preview" class="stream-mjpeg" alt="Recognize test capture preview" />
+        </div>
+      </section>
+
+      <div id="capture-countdown-modal" class="modal" aria-hidden="true">
+        <div class="modal-content capture-modal-content">
+          <h3>Prepare for Face Capture</h3>
+          <p id="capture-countdown-text" class="muted" style="margin-top:8px;">Capture will start in 5 seconds.</p>
+          <div class="stream-viewport capture-preview-wrap" style="margin-top:10px;">
+            <img id="capture-preview-stream" class="stream-mjpeg" alt="Capture preview" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+            <button id="capture-countdown-cancel-btn" class="btn-ghost" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="/face_test.js"></script>
+  </body>
+</html>

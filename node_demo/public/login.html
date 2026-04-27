@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth Center - IP Camera Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card auth-card">
+        <div class="auth-head">
+          <span class="pill">Node Demo</span>
+          <select id="lang-select">
+              <option value="zh">Chinese</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <h1 id="title">IP Camera User & Auth</h1>
+        <p id="desc" class="muted">Supports login, register, and forgot password.</p>
+
+        <div class="tabs">
+          <button id="tab-login" class="tab active">Login</button>
+          <button id="tab-register" class="tab">Register</button>
+        </div>
+
+        <form id="login-form" class="form-pane active">
+          <label>Username</label>
+          <input id="login-username" type="text" required />
+          <label style="margin-top: 12px;">Password</label>
+          <div class="password-row">
+            <input id="login-password" type="password" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" data-target="login-password" aria-pressed="false" aria-label="Show or hide password">Show</button>
+          </div>
+          <button type="submit" class="btn-primary">Login</button>
+          <button id="btn-forgot" type="button" class="btn-link">Forgot Password</button>
+        </form>
+
+        <form id="register-form" class="form-pane">
+          <label>Username</label>
+          <input id="reg-username" type="text" required />
+          <label style="margin-top: 12px;">Password</label>
+          <div class="password-row">
+            <input id="reg-password" type="password" autocomplete="new-password" required />
+            <button type="button" class="password-toggle" data-target="reg-password" aria-pressed="false" aria-label="Show or hide password">Show</button>
+          </div>
+          <label style="margin-top: 12px;">User Type</label>
+          <select id="reg-user-type">
+            <option value="personal">personal</option>
+            <option value="company">company</option>
+            <option value="security">security</option>
+          </select>
+          <button type="submit" class="btn-primary">Register</button>
+        </form>
+
+        <p id="auth-msg" class="muted" style="margin-top: 12px;"></p>
+      </section>
+    </main>
+    <script src="/login.js"></script>
+  </body>
+</html>

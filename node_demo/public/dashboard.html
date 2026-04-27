@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - IP Camera Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div>
+            <span class="pill">Dashboard</span>
+            <h1 style="margin-top:8px;">Dashboard</h1>
+            <p class="muted">Welcome, <strong id="welcome-name">User</strong> (<span id="welcome-type">personal</span>)</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="lang-select">
+              <option value="zh">Chinese</option>
+              <option value="en">English</option>
+            </select>
+            <button id="logout-btn" class="btn-ghost">Logout</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tabs nav-tabs">
+          <button class="tab active nav-btn" data-section="stream">Stream</button>
+          <button class="tab nav-btn" data-section="nfc">NFC</button>
+          <button class="tab nav-btn" data-section="enroll">Enroll</button>
+          <button class="tab nav-btn" data-section="profiles">Profiles</button>
+          <button class="tab nav-btn" data-section="logs">Logs</button>
+          <button class="tab nav-btn" data-section="settings">Settings</button>
+          <button class="tab nav-btn" data-section="warnings">Warnings</button>
+        </div>
+      </section>
+
+      <section id="stream-section" class="card content-section active">
+        <h3>Live Stream</h3>
+        <p class="muted" style="margin-top: 8px">
+          USB camera stream is served by ffmpeg (640x480, 15fps) as MJPEG. Access to <code>/api/stream</code> requires a logged-in session.
+        </p>
+        <div class="stream-viewport">
+          <img
+            id="live-stream"
+            class="stream-mjpeg"
+            alt="USB camera stream"
+            width="640"
+            height="480"
+          />
+          <div id="stream-live-overlay" class="stream-live-overlay" aria-live="polite">
+            <div id="stream-live-overlay-title" class="stream-live-overlay-title">Verifying...</div>
+            <div id="stream-live-overlay-subtitle" class="stream-live-overlay-subtitle">Please wait</div>
+          </div>
+        </div>
+        <p id="stream-status" class="muted" style="margin-top: 10px; font-size: 13px"></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+          <button id="face-recognize-now-btn" class="btn-ghost" type="button">Recognize Face Now (Current Frame)</button>
+          <a href="/face-test" class="btn-ghost" style="text-decoration:none;">Open Face Recognition Test Page</a>
+          <span id="face-recognize-status" class="muted" style="font-size:13px"></span>
+        </div>
+        <p id="face-recognize-result" class="muted" style="margin-top:8px;font-size:13px;"></p>
+        <div style="margin-top:10px;padding:10px;border:1px solid #2c3545;border-radius:8px;background:#151b26;">
+          <div><strong>NFC Live Verification</strong></div>
+          <p id="nfc-live-status" class="muted" style="margin-top:6px;font-size:13px;"></p>
+          <p id="nfc-live-result" class="muted" style="margin-top:4px;font-size:13px;"></p>
+        </div>
+      </section>
+
+      <section id="enroll-section" class="card content-section">
+        <h3>Permitted Person Enrollment (Face + NFC)</h3>
+        <p class="muted" style="margin-top:8px;">
+          Flow: fill in profile -> click "Read Card & Enroll" -> the system reads NFC, captures face from live stream, and stores it into `faces/`.
+        </p>
+        <div class="grid-2" style="margin-top:12px;">
+          <div>
+            <label>Name (required)</label>
+            <input id="enroll-name" placeholder="Example: Kam Pong Wong" />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input id="enroll-phone" placeholder="Example: 11111111" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="enroll-email" placeholder="Example: abc@example.com" />
+          </div>
+          <div>
+            <label>Note</label>
+            <input id="enroll-note" placeholder="Optional" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+          <button id="enroll-submit-btn" class="btn-primary" type="button">Read Card & Enroll</button>
+          <span id="enroll-status" class="muted" style="font-size:13px"></span>
+        </div>
+      </section>
+
+      <section id="nfc-section" class="card content-section">
+        <h3>NFC Pairing (Prototype)</h3>
+        <p class="muted" style="margin-top: 8px">
+          Flow: fill person info -> click "Read Card & Pair" (calls backend `/api/nfc/pair`, then ESP32S3 <code>/nfc/read</code>) -> captures one camera photo after success (`/api/capture`).
+        </p>
+
+        <div class="grid-2" style="margin-top: 12px">
+          <div>
+            <label>Name (required)</label>
+            <input id="nfc-name" placeholder="Example: John Smith" />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input id="nfc-phone" placeholder="Example: 13800000000" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="nfc-email" placeholder="Example: zs@example.com" />
+          </div>
+          <div>
+            <label>Note</label>
+            <input id="nfc-note" placeholder="Optional" />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+          <button id="nfc-pair-btn" class="btn-primary" type="button">Read Card, Pair & Capture</button>
+          <button id="nfc-monitor-start-btn" class="btn-ghost" type="button">Start Background Monitor</button>
+          <button id="nfc-monitor-stop-btn" class="btn-ghost" type="button">Stop Background Monitor</button>
+          <button id="nfc-refresh-btn" class="btn-ghost" type="button">Refresh Paired List</button>
+          <button id="nfc-snapshot-btn" class="btn-ghost" type="button">Capture One Photo</button>
+          <span id="nfc-status" class="muted" style="font-size:13px"></span>
+        </div>
+        <p id="nfc-monitor-status" class="muted" style="margin-top:8px;font-size:13px;"></p>
+
+        <div style="margin-top:12px;">
+          <h4 style="margin: 0 0 6px 0;">Latest Capture</h4>
+          <div class="stream-viewport" style="max-width: 640px;">
+            <img id="nfc-last-photo" class="stream-mjpeg" alt="Captured photo" />
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <h4 style="margin: 0 0 6px 0;">NFC Records</h4>
+          <ul id="nfc-list" class="muted"></ul>
+        </div>
+
+        <div style="margin-top:14px;">
+          <h4 style="margin: 0 0 6px 0;">Swipe Events (Permission Decision)</h4>
+          <ul id="nfc-events-list" class="muted"></ul>
+        </div>
+      </section>
+
+      <section id="profiles-section" class="card content-section">
+        <h3>Registered Profiles</h3>
+        <p class="muted" style="margin-top:8px;">Displays profile, photo, and permission details for NFC-bound users.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button id="profiles-refresh-btn" class="btn-ghost" type="button">Refresh Profiles</button>
+          <span class="muted" style="font-size:13px;">Cards show photo, card UID, and contact info</span>
+          <span id="profiles-status" class="muted" style="font-size:13px;"></span>
+        </div>
+        <div id="profiles-list" class="profiles-grid" style="margin-top:12px;"></div>
+      </section>
+
+      <section id="logs-section" class="card content-section">
+        <h3>Access Logs</h3>
+        <ul id="logs-list" class="muted"></ul>
+      </section>
+
+      <section id="settings-section" class="card content-section">
+        <h3>Settings</h3>
+        <h4>Face Threshold</h4>
+        <p class="muted" style="margin-top:8px;">
+          Adjust match confidence threshold (0.10 - 0.99). Higher means stricter matching.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input id="face-threshold-input" type="number" min="0.1" max="0.99" step="0.01" style="max-width:140px;" />
+          <button id="face-threshold-save-btn" class="btn-ghost" type="button">Save Threshold</button>
+          <span id="face-threshold-status" class="muted" style="font-size:13px;"></span>
+        </div>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #2c3545;" />
+        <form id="change-password-form">
+          <label>Current Password</label>
+          <div class="password-row">
+            <input id="old-password" type="password" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" data-target="old-password" aria-pressed="false" aria-label="Show or hide password">Show</button>
+          </div>
+          <label style="margin-top: 8px;">New Password</label>
+          <div class="password-row">
+            <input id="new-password" type="password" autocomplete="new-password" required />
+            <button type="button" class="password-toggle" data-target="new-password" aria-pressed="false" aria-label="Show or hide password">Show</button>
+          </div>
+          <button class="btn-primary" type="submit">Change Password</button>
+        </form>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #2c3545;" />
+        <h4>Profile Review & Retake</h4>
+        <p class="muted" style="margin-top:8px;">
+          Enter card UID to update profile info. "Retake with Current Stream" updates both avatar and face library image.
+        </p>
+        <div class="grid-2" style="margin-top:12px;">
+          <div>
+            <label>Card UID (required)</label>
+            <input id="settings-card-uid" placeholder="Example: 7BC8B502" />
+          </div>
+          <div>
+            <label>Name (required)</label>
+            <input id="settings-name" placeholder="Example: Kam Pong Wong" />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input id="settings-phone" placeholder="Example: 11111111" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="settings-email" placeholder="Example: abc@example.com" />
+          </div>
+          <div>
+            <label>Note</label>
+            <input id="settings-note" placeholder="Optional" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+          <button id="settings-update-only-btn" class="btn-ghost" type="button">Update Info Only</button>
+          <button id="settings-recap-photo-btn" class="btn-primary" type="button">Retake with Current Stream</button>
+          <span id="settings-status" class="muted" style="font-size:13px"></span>
+        </div>
+      </section>
+
+      <section id="warnings-section" class="card content-section">
+        <h3>Security Warnings</h3>
+        <button id="open-warning-modal" class="btn-ghost">Open Warning Modal</button>
+        <ul id="warnings-list" class="muted"></ul>
+      </section>
+
+      <div id="warning-modal" class="modal">
+        <div class="modal-content">
+          <h3>Security Warnings</h3>
+          <div id="warning-modal-body"></div>
+          <button id="close-warning-modal" class="btn-primary">Close</button>
+        </div>
+      </div>
+
+      <div id="capture-countdown-modal" class="modal" aria-hidden="true">
+        <div class="modal-content capture-modal-content">
+          <h3>Prepare for Face Capture</h3>
+          <p id="capture-countdown-text" class="muted" style="margin-top:8px;">Capture will start in 5 seconds.</p>
+          <div class="stream-viewport capture-preview-wrap" style="margin-top:10px;">
+            <img id="capture-preview-stream" class="stream-mjpeg" alt="Capture preview" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+            <button id="capture-countdown-cancel-btn" class="btn-ghost" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="/dashboard.js"></script>
+  </body>
+</html>

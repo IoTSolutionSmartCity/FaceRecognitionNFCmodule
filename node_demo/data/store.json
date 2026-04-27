@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@demo.local",
+      "password": "admin123",
+      "userType": "personal"
+    }
+  ],
+  "resetTokens": {
+    "reset_1776951765710": "admin"
+  },
+  "warnings": [],
+  "nfc": [
+    {
+      "id": 1,
+      "card_uid": "791AFE06",
+      "person": {
+        "name": "Kam Pong Wong",
+        "phone": "11111111",
+        "email": "arthurwong0615@gmail.com",
+        "note": "",
+        "permitted": true,
+        "face_file": "Kam_Pong_Wong_791AFE06.jpg"
+      },
+      "photo_url": "/captures/cap_1777083461358_frame.jpg",
+      "created_at": "2026-04-25T02:17:35.573Z",
+      "updated_at": "2026-04-25T16:36:38.678Z"
+    }
+  ],
+  "nfcEvents": []
+}

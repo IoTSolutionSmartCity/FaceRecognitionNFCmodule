@@ -1,0 +1,12 @@
+# IBSP: face recognition (face/face_api.py, stream_recognize.py) and
+# node_demo/scripts/face_match.py
+#
+# Install: pip install -r requirements.txt
+# For GPU (optional): pip install onnxruntime-gpu  (and uninstall onnxruntime if both conflict)
+
+numpy>=1.24.0,<3
+opencv-python>=4.8.0
+onnxruntime>=1.16.0
+Pillow>=10.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0

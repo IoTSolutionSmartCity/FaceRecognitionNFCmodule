@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Tools - Node Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <h1>JSON Admin Console (Demo)</h1>
+        <p class="muted">Used to manage `data/store.json` for development and debugging only.</p>
+      </section>
+
+      <section class="card">
+        <h3>Add Warning</h3>
+        <form id="add-warning-form">
+          <label>Action</label>
+          <input id="warning-action" type="text" placeholder="Unauthorized access attempt" required />
+          <label style="margin-top:8px;">Camera IP</label>
+          <input id="warning-ip" type="text" value="192.168.0.136" />
+          <label style="margin-top:8px;">Status</label>
+          <select id="warning-status">
+            <option value="pending">pending</option>
+            <option value="reviewed">reviewed</option>
+            <option value="dismissed">dismissed</option>
+          </select>
+          <button class="btn-primary" type="submit">Add Warning</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="btn-refresh" class="btn-ghost">Refresh Store</button>
+          <button id="btn-clear-reset" class="btn-ghost">Clear Reset Tokens</button>
+          <button id="btn-reset-all" class="btn-ghost">Reset All Data</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Current Warnings (Deletable)</h3>
+        <ul id="warnings-admin-list"></ul>
+      </section>
+
+      <section class="card">
+        <h3>Store Snapshot</h3>
+        <pre id="store-json" style="white-space: pre-wrap; word-break: break-word; background:#f6f8fb; padding:12px; border-radius:8px;"></pre>
+      </section>
+    </main>
+    <script src="/admin.js"></script>
+  </body>
+  </html>
