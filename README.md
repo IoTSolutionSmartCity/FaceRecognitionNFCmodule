@@ -325,13 +325,138 @@ Higher threshold = stricter matching.
 
 ## 8) System Diagrams
 
-![System Architecture](docs/diagrams/system_architecture.svg)
+View diagrams in Mermaid format by clicking the links below:
 
-![Data Flow](docs/diagrams/data_flow.svg)
+- [System Architecture Diagram](docs/diagrams/system_architecture.md) | [SVG](docs/diagrams/system_architecture.svg) | [D2 Source](docs/diagrams/system_architecture.d2)
+- [Data Flow Diagram](docs/diagrams/data_flow.md) | [SVG](docs/diagrams/data_flow.svg) | [D2 Source](docs/diagrams/data_flow.d2)
+- [Network Topology Diagram](docs/diagrams/network_topology.md) | [SVG](docs/diagrams/network_topology.svg) | [D2 Source](docs/diagrams/network_topology.d2)
 
-![Network Topology](docs/diagrams/network_topology.svg)
+### System Architecture
 
-> **Note:** Diagrams are defined in D2 format in `docs/diagrams/*.d2` and rendered to SVG.
+```mermaid
+flowchart TB
+    subgraph Web["🌐 Web Layer"]
+        Browser["🖥️ Web Browser<br/>(Dashboard)"]
+        Dashboard_Server["🔷 Express Server<br/>:5000"]
+    end
+
+    subgraph Processing["⚙️ Processing Layer"]
+        Face_Service["📦 Face Service<br/>:8001"]
+        Face_DB["🗄️ Face Library<br/>(facelib)"]
+        Stream_Service["📹 ffmpeg-static"]
+        USB_Camera["📷 USB Camera"]
+    end
+
+    subgraph Hardware["🔌 Hardware Layer"]
+        ESP32["🟠 ESP32-S3<br/>NFC Controller"]
+        NFC_Reader["📟 MFRC522<br/>NFC Reader"]
+        LED_LCD["💡 RGB LED<br/>LCD Display"]
+        NFC_Card["💳 NFC Card<br/>(MIFARE)"]
+    end
+
+    subgraph Data["💾 Data Layer"]
+        Store_JSON["📄 store.json"]
+        Events_DB["🗃️ events.db<br/>(SQLite)"]
+        Captures["📁 Captures<br/>/public"]
+    end
+
+    Browser --> Dashboard_Server
+    Dashboard_Server -->|"HTTP /match"| Face_Service
+    Face_Service --> Face_DB
+    Dashboard_Server --> Stream_Service
+    Stream_Service --> USB_Camera
+    Dashboard_Server -->|"HTTP :80"| ESP32
+    ESP32 -->|"SPI"| NFC_Reader
+    ESP32 -->|"I2C"| LED_LCD
+    NFC_Card -->|"RFID"| NFC_Reader
+    Dashboard_Server --> Store_JSON
+    Dashboard_Server --> Events_DB
+    Dashboard_Server --> Captures
+    Face_Service --> Captures
+```
+
+### Data Flow
+
+```mermaid
+flowchart TD
+    START(["👤 User<br/>Present<br/>NFC Card"]) --> STEP1
+    STEP1["1️⃣ ESP32 reads<br/>NFC Card UID"] --> STEP2
+    STEP2["2️⃣ UID sent to<br/>Node Server"] --> STEP3
+    STEP3{"3️⃣ Check<br/>Registered?"}
+
+    STEP3 -->|"No"| STEP4["4️⃣ DENY<br/>Unregistered"]
+    STEP3 -->|"Yes"| STEP5["5️⃣ Capture Face<br/>via Stream"]
+    STEP4 --> STEP13["12️⃣ Send Result<br/>to ESP32"]
+    STEP5 --> STEP6["6️⃣ Send to<br/>Face Service"]
+    STEP6 --> STEP7{"7️⃣ Face Match<br/>& Score?"}
+
+    STEP7 -->|"Score <<br/>Threshold"| STEP8["8️⃣ DENY<br/>Mismatch/Low Score"]
+    STEP7 -->|"Score >=<br/>Threshold"| STEP9["9️⃣ Name Match<br/>Verification"]
+    STEP8 --> STEP13
+    STEP9 --> STEP10{"🔟 All<br/>Checks Pass?"}
+
+    STEP10 -->|"Match"| STEP11["✅ ALLOW<br/>Access Granted"]
+    STEP10 -->|"Mismatch"| STEP12["❌ DENY<br/>Verification Failed"]
+    STEP11 --> STEP13
+    STEP12 -->|"Log Event"| STEP13
+    STEP13 -->|"HTTP POST<br/>/permission-result"| STEP14["📤 ESP32 shows<br/>LED/LCD"]
+    STEP14 -->|"allowed=true"| END_ALLOW(["🟢 GREEN LED<br/>5s hold"])
+    STEP14 -->|"allowed=false"| STEP14b["🔴 RED LED<br/>Blink"]
+
+    style START fill:#4caf50,stroke:#2e7d32,color:#fff
+    style END_ALLOW fill:#4caf50,stroke:#2e7d32,color:#fff
+    style STEP14b fill:#f44336,stroke:#b71c1c,color:#fff
+    style STEP3 fill:#fff3e0,stroke:#ff9800
+    style STEP7 fill:#fff3e0,stroke:#ff9800
+    style STEP10 fill:#fff3e0,stroke:#ff9800
+    style STEP4 fill:#fce4ec,stroke:#e91e63
+    style STEP8 fill:#fce4ec,stroke:#e91e63
+    style STEP12 fill:#fce4ec,stroke:#e91e63
+    style STEP11 fill:#c8e6c9,stroke:#4caf50
+```
+
+### Network Topology
+
+```mermaid
+flowchart TB
+    subgraph Internet["☁️ Internet"]
+        INTERNET["🌐 Internet"]
+    end
+
+    subgraph HostPC["💻 Host PC"]
+        Browser["🖥️ Web Browser<br/>(Dashboard)"]
+        Node_Server["🔷 Express Server<br/>:5000"]
+        Face_Service["📦 Face Service<br/>:8001"]
+        FFmpeg["📹 ffmpeg-static"]
+        SQLite["🗃️ SQLite DB"]
+        Store_JSON["📄 store.json"]
+    end
+
+    subgraph ESP32Device["🔌 ESP32 Device"]
+        ESP32["🟠 ESP32-S3<br/>NFC Controller"]
+        NFC_Reader["📟 MFRC522<br/>NFC Reader"]
+        LED_LCD["💡 LED + LCD"]
+    end
+
+    CAMERA["📷 USB Camera"]
+    NFC_CARD["💳 NFC Card"]
+
+    Internet --> Browser
+    Browser --> Node_Server
+    Node_Server --> Face_Service
+    Node_Server --> FFmpeg
+    FFmpeg --> CAMERA
+    Node_Server --> SQLite
+    Node_Server --> Store_JSON
+    Node_Server -->|"HTTP :80"| ESP32
+    ESP32 -->|"SPI"| NFC_Reader
+    ESP32 -->|"I2C"| LED_LCD
+    NFC_CARD -->|"RFID"| NFC_Reader
+
+    style INTERNET fill:#eceff1,stroke:#78909c,color:#37474f
+    style ESP32 fill:#fff3e0,stroke:#fb8c00
+    style CAMERA fill:#ffcdd2,stroke:#e53935
+```
 
 ## 9) Useful Endpoints
 
