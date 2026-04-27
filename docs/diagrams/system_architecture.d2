@@ -3,118 +3,106 @@
 
 title: IBSP System Architecture
 
-# Styles
-shape: rectangle
-ROUNDED_RECT: shape: rectangle; style.rounded=8
-DIAMOND: shape: diamond
-CIRCLE: shape: circle
-DATABASE: shape: cylinder
-HTTPSERVER: shape: hexagon
-PYTHON: shape: step
-
-# Main Groups
-Web_Layer: {
+# Web Layer
+Browser: {
   shape: rectangle
+  style.rounded: 8
+  style.fill: "#bbdefb"
+  label: "Web Browser\n(Dashboard)"
+}
+
+Dashboard_Server: {
+  shape: hexagon
   style.fill: "#e3f2fd"
-  style.stroke: "#1976d2"
-  label: "Web Layer"
-  
-  Browser: {
-    shape: image
-    icon: "https://cdn-icons-png.flaticon.com/512/2965/2965327.png"
-    label: "Dashboard UI\n(Browser)"
-  }
-  
-  Dashboard_Server: HTTPSERVER {
-    label: "Express Server\n:5000"
-  }
+  label: "Express Server\n(:5000)"
 }
 
-Processing_Layer: {
-  shape: rectangle
+# Processing Layer
+Face_Service: {
+  shape: step
   style.fill: "#fff3e0"
-  style.stroke: "#f57c00"
-  label: "Processing Layer"
-  
-  Face_Service: PYTHON {
-    label: "Face Service\n:8001"
-  }
-  
-  Face_DB: DATABASE {
-    label: "Face Library\n(face/facelib)"
-  }
-  
-  Stream_Service: {
-    shape: step
-    label: "ffmpeg-static\n(MJPEG Stream)"
-  }
+  label: "Face Service\n(:8001)"
 }
 
-Hardware_Layer: {
-  shape: rectangle
-  style.fill: "#e8f5e9"
-  style.stroke: "#388e3c"
-  label: "Hardware Layer"
-  
-  ESP32: {
-    shape: rectangle
-    style.rounded: 4
-    label: "ESP32-S3\nNFC Controller"
-  }
-  
-  NFC_Reader: DIAMOND {
-    label: "MFRC522\nNFC Reader"
-  }
-  
-  LED_LCD: {
-    shape: rectangle
-    style.rounded: 4
-    label: "RGB LED\nLCD Display"
-  }
+Face_DB: {
+  shape: cylinder
+  style.fill: "#ffe0b2"
+  label: "Face Library\n(facelib)"
 }
 
-Data_Layer: {
-  shape: rectangle
+Stream_Service: {
+  shape: step
   style.fill: "#f3e5f5"
-  style.stroke: "#7b1fa2"
-  label: "Data Layer"
-  
-  Store_JSON: DATABASE {
-    label: "store.json\n(Profiles)"
-  }
-  
-  Events_DB: DATABASE {
-    label: "events.db\n(SQLite)"
-  }
-  
-  Captures: DATABASE {
-    label: "Captures\n(/public)"
-  }
+  label: "ffmpeg-static"
 }
 
-# External
 USB_Camera: {
   shape: rectangle
-  style.fill: "#ffebee"
-  style.stroke: "#c62828"
-  label: "USB Camera\n(MJPEG)"
+  style.rounded: 8
+  style.fill: "#ffcdd2"
+  style.stroke: "#e53935"
+  label: "USB Camera"
 }
 
-NFC_Card: CIRCLE {
+# Hardware Layer
+ESP32: {
+  shape: rectangle
+  style.rounded: 8
+  style.fill: "#fff3e0"
+  style.stroke: "#fb8c00"
+  label: "ESP32-S3\nNFC Controller"
+}
+
+NFC_Reader: {
+  shape: rectangle
+  style.rounded: 6
+  style.fill: "#ffccbc"
+  label: "MFRC522\nNFC Reader"
+}
+
+LED_LCD: {
+  shape: rectangle
+  style.rounded: 6
+  style.fill: "#c8e6c9"
+  label: "RGB LED\nLCD Display"
+}
+
+NFC_Card: {
+  shape: oval
+  style.fill: "#e1bee7"
   label: "NFC Card\n(MIFARE)"
 }
 
+# Data Layer
+Store_JSON: {
+  shape: cylinder
+  style.fill: "#fff8e1"
+  label: "store.json"
+}
+
+Events_DB: {
+  shape: cylinder
+  style.fill: "#e8f5e9"
+  label: "events.db\n(SQLite)"
+}
+
+Captures: {
+  shape: cylinder
+  style.fill: "#e1f5fe"
+  label: "Captures\n(/public)"
+}
+
 # Connections
-Browser -> Dashboard_Server: "HTTP/HTTPS\n:5000"
-Dashboard_Server <-> Store_JSON: "JSON RW"
-Dashboard_Server <-> Events_DB: "SQLite"
-Dashboard_Server <-> Stream_Service: "MJPEG Frames"
-Stream_Service -> USB_Camera: "dshow/v4l2"
-Dashboard_Server <-> Face_Service: "HTTP POST\n/match"
-Face_Service <-> Face_DB: "Face Images"
-Dashboard_Server <-> ESP32: "HTTP API\n:80"
+Browser -> Dashboard_Server
+Dashboard_Server -> Face_Service: "HTTP /match"
+Face_Service -> Face_DB
+Dashboard_Server -> Stream_Service
+Stream_Service -> USB_Camera
+Dashboard_Server -> ESP32: "HTTP :80"
 ESP32 -> NFC_Reader: "SPI"
 ESP32 -> LED_LCD: "I2C"
 NFC_Card -> NFC_Reader: "RFID"
-Dashboard_Server <-> Captures: "Save Images"
-Face_Service <-> Captures: "Read Images"
+Dashboard_Server -> Store_JSON
+Dashboard_Server -> Events_DB
+Dashboard_Server -> Captures
+Face_Service -> Captures
