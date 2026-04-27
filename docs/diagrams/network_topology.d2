@@ -3,7 +3,7 @@
 
 title: IBSP Network Topology
 
-# Styles
+# Internet
 INTERNET: {
   shape: cloud
   style.fill: "#eceff1"
@@ -11,6 +11,7 @@ INTERNET: {
   label: "Internet"
 }
 
+# Host PC
 LOCAL_PC: {
   shape: rectangle
   style.fill: "#e3f2fd"
@@ -20,7 +21,6 @@ LOCAL_PC: {
 
 Browser: {
   shape: rectangle
-  style.rounded: 6
   style.fill: "#bbdefb"
   label: "Web Browser\n(Dashboard)"
 }
@@ -39,7 +39,6 @@ Face_Service: {
 
 FFmpeg: {
   shape: rectangle
-  style.rounded: 6
   style.fill: "#f3e5f5"
   label: "ffmpeg-static"
 }
@@ -56,9 +55,9 @@ Store_JSON: {
   label: "store.json"
 }
 
+# ESP32 Device
 ESP32: {
   shape: rectangle
-  style.rounded: 8
   style.fill: "#fff3e0"
   style.stroke: "#fb8c00"
   label: "ESP32-S3\nNFC Controller"
@@ -66,26 +65,25 @@ ESP32: {
 
 NFC_Reader: {
   shape: rectangle
-  style.rounded: 6
   style.fill: "#ffccbc"
   label: "MFRC522\nNFC Reader"
 }
 
 LED_LCD: {
   shape: rectangle
-  style.rounded: 6
   style.fill: "#c8e6c9"
   label: "LED + LCD"
 }
 
+# USB Camera
 CAMERA: {
   shape: rectangle
-  style.rounded: 6
   style.fill: "#ffcdd2"
   style.stroke: "#e53935"
   label: "USB Camera"
 }
 
+# NFC Card
 NFC_CARD: {
   shape: oval
   style.fill: "#e1bee7"
@@ -93,23 +91,14 @@ NFC_CARD: {
 }
 
 # Connections
-INTERNET -> Browser -> Node_Server
+INTERNET -> Browser
+Browser -> Node_Server
 Node_Server -> Face_Service
-Node_Server -> FFmpeg -> CAMERA
+Node_Server -> FFmpeg
+FFmpeg -> CAMERA
 Node_Server -> SQLite
 Node_Server -> Store_JSON
 Node_Server -> ESP32: "HTTP :80"
 ESP32 -> NFC_Reader: "SPI"
 ESP32 -> LED_LCD: "I2C"
 NFC_CARD -> NFC_Reader: "RFID"
-
-# Legend Box
-Legend_Box: {
-  shape: rectangle
-  style.fill: "#fafafa"
-  style.stroke: "#e0e0e0"
-  label: "Connection Types"
-}
-Legend_Box -> INTERNET: "WiFi"
-Legend_Box -> CAMERA: "USB"
-Legend_Box -> NFC_Reader: "SPI"
