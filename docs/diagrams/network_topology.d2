@@ -3,7 +3,7 @@
 
 title: IBSP Network Topology
 
-# Network zones
+# Styles
 INTERNET: {
   shape: cloud
   style.fill: "#eceff1"
@@ -11,144 +11,105 @@ INTERNET: {
   label: "Internet"
 }
 
-WIFI_NETWORK: {
-  shape: rectangle
-  style.fill: "#e8f5e9"
-  style.stroke: "#43a047"
-  style.dashed: true
-  label: "IoTSwitch WiFi Network\n(192.168.x.x)"
-}
-
 LOCAL_PC: {
   shape: rectangle
   style.fill: "#e3f2fd"
   style.stroke: "#1976d2"
-  label: "Host PC (Windows/Linux)"
+  label: "Host PC"
 }
 
-# Components on Host PC
-Host_PC: {
-  Browser: {
-    shape: rectangle
-    style.rounded: 4
-    label: "Web Browser\nDashboard"
-  }
-  
-  Node_Server: {
-    shape: hexagon
-    label: "Express Server\n:5000"
-  }
-  
-  Face_Service: {
-    shape: step
-    label: "Python Face\nService :8001"
-  }
-  
-  FFmpeg: {
-    shape: rectangle
-    style.rounded: 4
-    label: "ffmpeg-static\n(ffmpeg.exe)"
-  }
-  
-  SQLite: {
-    shape: cylinder
-    label: "SQLite DB\n(events.db)"
-  }
-  
-  Store_JSON: {
-    shape: cylinder
-    label: "JSON Store\n(store.json)"
-  }
-}
-
-# ESP32 Device
-ESP32_DEVICE: {
+Browser: {
   shape: rectangle
+  style.rounded: 6
+  style.fill: "#bbdefb"
+  label: "Web Browser\n(Dashboard)"
+}
+
+Node_Server: {
+  shape: hexagon
+  style.fill: "#e1f5fe"
+  label: "Express Server\n(:5000)"
+}
+
+Face_Service: {
+  shape: step
+  style.fill: "#fff3e0"
+  label: "Face Service\n(:8001)"
+}
+
+FFmpeg: {
+  shape: rectangle
+  style.rounded: 6
+  style.fill: "#f3e5f5"
+  label: "ffmpeg-static"
+}
+
+SQLite: {
+  shape: cylinder
+  style.fill: "#e8f5e9"
+  label: "SQLite DB"
+}
+
+Store_JSON: {
+  shape: cylinder
+  style.fill: "#fff8e1"
+  label: "store.json"
+}
+
+ESP32: {
+  shape: rectangle
+  style.rounded: 8
   style.fill: "#fff3e0"
   style.stroke: "#fb8c00"
-  label: "ESP32-S3-WROOM-1"
-  
-  NFC_Module: {
-    shape: rectangle
-    style.rounded: 4
-    label: "MFRC522\nNFC Reader"
-  }
-  
-  LED: {
-    shape: oval
-    label: "RGB LED"
-  }
-  
-  LCD: {
-    shape: rectangle
-    label: "LCD 16x2\n(I2C)"
-  }
-  
-  WiFi_Client: {
-    shape: rectangle
-    style.rounded: 4
-    label: "WiFi Client"
-  }
+  label: "ESP32-S3\nNFC Controller"
 }
 
-# USB Camera
+NFC_Reader: {
+  shape: rectangle
+  style.rounded: 6
+  style.fill: "#ffccbc"
+  label: "MFRC522\nNFC Reader"
+}
+
+LED_LCD: {
+  shape: rectangle
+  style.rounded: 6
+  style.fill: "#c8e6c9"
+  label: "LED + LCD"
+}
+
 CAMERA: {
   shape: rectangle
-  style.fill: "#ffebee"
+  style.rounded: 6
+  style.fill: "#ffcdd2"
   style.stroke: "#e53935"
-  label: "USB Camera\n(Webcam)"
+  label: "USB Camera"
 }
 
-# NFC Card
 NFC_CARD: {
   shape: oval
-  style.fill: "#f3e5f5"
-  label: "NFC Card\n(MIFARE)"
+  style.fill: "#e1bee7"
+  label: "NFC Card"
 }
 
 # Connections
-INTERNET -> Browser: "HTTP :5000" {style.stroke: "#90a4ae"}
+INTERNET -> Browser -> Node_Server
+Node_Server -> Face_Service
+Node_Server -> FFmpeg -> CAMERA
+Node_Server -> SQLite
+Node_Server -> Store_JSON
+Node_Server -> ESP32: "HTTP :80"
+ESP32 -> NFC_Reader: "SPI"
+ESP32 -> LED_LCD: "I2C"
+NFC_CARD -> NFC_Reader: "RFID"
 
-Browser <-> Node_Server: "localhost"
-Node_Server <-> Face_Service: "HTTP :8001"
-Node_Server <-> FFmpeg: "stdout/stderr"
-FFmpeg -> CAMERA: "dshow\n(v4l2)"
-Node_Server <-> SQLite: "file I/O"
-Node_Server <-> Store_JSON: "file I/O"
-
-Node_Server <-> ESP32_DEVICE.WiFi_Client: "HTTP :80\n(mDNS/discover)"
-
-ESP32_DEVICE.WiFi_Client <-> NFC_Module: "SPI"
-ESP32_DEVICE -> LED: "GPIO"
-ESP32_DEVICE -> LCD: "I2C"
-
-NFC_CARD -> NFC_Module: "13.56MHz\nRFID"
-
-# Legend
-Legend: {
+# Legend Box
+Legend_Box: {
   shape: rectangle
   style.fill: "#fafafa"
   style.stroke: "#e0e0e0"
-  label: "Legend"
-  
-  W: {
-    shape: rectangle
-    style.rounded: 4
-    style.fill: "#e8f5e9"
-    label: "WiFi"
-  }
-  
-  USB: {
-    shape: rectangle
-    style.rounded: 4
-    style.fill: "#ffebee"
-    label: "USB"
-  }
-  
-  SPI: {
-    shape: rectangle
-    style.rounded: 4
-    style.fill: "#fff3e0"
-    label: "SPI"
-  }
+  label: "Connection Types"
 }
+Legend_Box -> INTERNET: "WiFi"
+Legend_Box -> CAMERA: "USB"
+Legend_Box -> NFC_Reader: "SPI"
