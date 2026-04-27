@@ -1,0 +1,151 @@
+# Data Flow Diagram
+# IBSP Access Verification Flow
+
+title: Access Verification Data Flow
+
+# Step containers
+START: {
+  shape: circle
+  style.fill: "#4caf50"
+  style.stroke: "#2e7d32"
+  label: "User\nPresent\nNFC Card"
+}
+
+STEP1: {
+  shape: rectangle
+  style.fill: "#e3f2fd"
+  label: "1. ESP32 reads\nNFC Card UID"
+}
+
+STEP2: {
+  shape: rectangle
+  style.fill: "#e8f5e9"
+  label: "2. UID sent to\nNode Server"
+}
+
+STEP3: {
+  shape: diamond
+  style.fill: "#fff3e0"
+  label: "3. Check\nRegistered?"
+}
+
+STEP4: {
+  shape: rectangle
+  style.fill: "#fce4ec"
+  label: "4a. DENY\nUnregistered"
+}
+
+STEP5: {
+  shape: rectangle
+  style.fill: "#e8f5e9"
+  label: "5. Capture Face\nvia Stream"
+}
+
+STEP6: {
+  shape: rectangle
+  style.fill: "#e3f2fd"
+  label: "6. Send to\nFace Service"
+}
+
+STEP7: {
+  shape: diamond
+  style.fill: "#fff3e0"
+  label: "7. Face Match\n& Score?"
+}
+
+STEP8: {
+  shape: rectangle
+  style.fill: "#fce4ec"
+  label: "8a. DENY\nMismatch/Low Score"
+}
+
+STEP9: {
+  shape: rectangle
+  style.fill: "#e8f5e9"
+  label: "9. Name Match\nVerification"
+}
+
+STEP10: {
+  shape: diamond
+  style.fill: "#fff3e0"
+  label: "10. All\nChecks Pass?"
+}
+
+STEP11: {
+  shape: rectangle
+  style.fill: "#c8e6c9"
+  label: "11a. ALLOW\nAccess Granted"
+}
+
+STEP12: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  label: "11b. DENY\nVerification Failed"
+}
+
+STEP13: {
+  shape: rectangle
+  style.fill: "#e3f2fd"
+  label: "12. Send Result\nto ESP32"
+}
+
+STEP14: {
+  shape: rectangle
+  style.fill: "#fff8e1"
+  label: "13. ESP32 shows\nLED/LCD"
+}
+
+END_ALLOW: {
+  shape: circle
+  style.fill: "#4caf50"
+  label: "GREEN LED\n5s hold"
+}
+
+END_DENY: {
+  shape: circle
+  style.fill: "#f44336"
+  label: "RED LED\nBlink"
+}
+
+# Flow connections
+START -> STEP1
+STEP1 -> STEP2: "HTTP GET\n/nfc/read"
+STEP2 -> STEP3: "UID Lookup"
+STEP3 -> STEP4: "No"
+STEP3 -> STEP5: "Yes"
+STEP4 -> STEP13: "Log Warning"
+STEP5 -> STEP6: "JPEG Frame"
+STEP6 -> STEP7: "Match Result"
+STEP7 -> STEP8: "Score <\nThreshold"
+STEP7 -> STEP9: "Score >=\nThreshold"
+STEP8 -> STEP13
+STEP9 -> STEP10: "Name\nCompare"
+STEP10 -> STEP11: "Match"
+STEP10 -> STEP12: "Mismatch"
+STEP11 -> STEP13
+STEP12 -> STEP13: "Log Event"
+STEP13 -> STEP14: "HTTP POST\n/permission-result"
+STEP14 -> END_ALLOW: "allowed=true"
+STEP14 -> END_DENY: "allowed=false"
+
+# Data stores on side
+NFC_Profiles: {
+  shape: cylinder
+  label: "NFC Profiles\n(store.json)"
+}
+
+Face_Library: {
+  shape: cylinder
+  label: "Face Library\n(face/facelib)"
+}
+
+Events_Log: {
+  shape: cylinder
+  label: "Events Log\n(events.db)"
+}
+
+# Reference annotations
+STEP2 -> NFC_Profiles: "Check UID" {style.stroke: "#1976d2"; style.stroke-dash: true}
+STEP6 -> Face_Library: "Compare\nFaces" {style.stroke: "#f57c00"; style.stroke-dash: true}
+STEP11 -> Events_Log: "Log ALLOW" {style.stroke: "#2e7d32"; style.stroke-dash: true}
+STEP12 -> Events_Log: "Log DENY" {style.stroke: "#c62828"; style.stroke-dash: true}
